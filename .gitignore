@@ -1,0 +1,5 @@
+.idea
+
+/googletest/
+
+/cmake-build-debug/
