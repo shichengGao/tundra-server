@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "../BlockingQueue.h"
+#include "../util/BlockingQueue.h"
 #include <memory>
 #include <thread>
 #include <chrono>
@@ -44,7 +44,7 @@ void runProducerConsumer() {
                 printf("consumer quit\n");
                 break;
             }
-            auto entry = buffer->pop();
+            auto entry = buffer->take();
             std::this_thread::sleep_for(std::chrono::milliseconds(500 + rand() % 1000));
 
         }

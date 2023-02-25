@@ -7,6 +7,9 @@
 /*
 / 条件变量的教科书级别应用
 */
+//!
+//! 这是对unique_lock的错误使用，不能在构造函数初始化ulk，它也是RAII类，构造导致上锁
+//!
 class CountDownLatch {
 public:
     explicit CountDownLatch(int count) : ulk(mtx_), count_(count) { };
