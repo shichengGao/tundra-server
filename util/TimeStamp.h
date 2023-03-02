@@ -7,7 +7,7 @@
 
 #include <unistd.h>
 #include <stdint.h>
-#include <string>
+#include "String.h"
 
 namespace tundra {
 
@@ -31,8 +31,8 @@ public:
         return static_cast<time_t>(microSecondsSinceUnixEpoch_ / kMicroSecondsPerSeconds);
     }
 
-    std::string toString() const;
-    std::string toFormatString() const;
+    String toString() const;
+    String toFormatString(bool showMicroseconds = true) const;
 
     static TimeStamp fromUnixTime(time_t t, int microSeconds) {
         return TimeStamp(static_cast<int64_t>(t) * kMicroSecondsPerSeconds * microSeconds);
@@ -43,6 +43,7 @@ public:
     }
 
     static TimeStamp now();
+
     static TimeStamp invalid() {
         return TimeStamp();
     }

@@ -25,6 +25,30 @@ public:
 
     String(const char* offset, int len) : data_(offset), len_(len) { }
 
+    String(const String& rhs) {
+        data_ = rhs.data_;
+        len_ = rhs.len_;
+    }
+
+    String(String&& rhs) {
+        data_ = rhs.data_;
+        len_ = rhs.len_;
+    }
+
+    String operator=(const String& rhs) {
+        data_ = rhs.data_;
+        len_ = rhs.len_;
+    }
+
+    String operator=(const String&& rhs) {
+        data_ = rhs.data_;
+        len_ = rhs.len_;
+    }
+
+    void swap(String& rhs) {
+        std::swap(*this, rhs);
+    }
+
     const char* data() const {
         return data_;
     }
@@ -81,6 +105,11 @@ public:
         return std::string (data_, len_);
     }
 
+    //implicit conversion to std::string
+    std::string string() {
+        return to_string();
+    }
+
 
 
 private:
@@ -89,31 +118,12 @@ private:
 };
 
 
-bool inline operator==(const String&  lhs, const String& rhs) {
-    return (lhs.size() == rhs.size()) && (memcmp(lhs.data(), rhs.data(), lhs.size()) == 0);
-}
-
-bool inline operator!=(const String&lhs, const String& rhs) {
-    return !(lhs == rhs);
-}
-
-bool operator<(const String&lhs, const String& rhs) {
-    int ret = memcmp(lhs.data(), rhs.data(), std::min(lhs.size(), rhs.size()));
-    return ret < 0 || (ret == 0 && lhs.size() < rhs.size());
-}
-
-bool operator<=(const String& lhs, const String& rhs) {
-    return lhs < rhs || lhs == rhs;
-}
-
-bool operator>(const String& lhs, const String& rhs) {
-    return !(lhs <= rhs);
-}
-
-bool operator>=(const String& lhs, const String& rhs) {
-    return !(lhs < rhs);
-}
-
+bool inline operator==(const String&  lhs, const String& rhs);
+bool inline operator!=(const String&lhs, const String& rhs);
+bool operator<(const String&lhs, const String& rhs);
+bool operator<=(const String& lhs, const String& rhs);
+bool operator>(const String& lhs, const String& rhs);
+bool operator>=(const String& lhs, const String& rhs);
 } // tundra
 
 #endif //TUNDRA_STRING_H
