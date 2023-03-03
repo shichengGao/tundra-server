@@ -15,27 +15,32 @@ namespace tundra {
     }
 
     mmapManager::mmapManager(const std::string& filename, int len)
-        : fName_(filename), len_(len) {
+        : fd_(-1), fName_(filename), len_(len) {
 
-        int fd = -1;
         if (!fName_.empty()) {
-            fd = open(fName_.c_str(), O_RDWR);
-            assert(fd >= 0);
+            fd_ = open(fName_.c_str(), O_CREAT|O_APPEND|O_RDWR);
+            assert(fd_ >= 0);
         }
 
+        //FIXME: wsl bug, move tundra to native linux afterwards
+        lseek(fd_,len, SEEK_SET);
+        write(fd_, " ", 1);;
+
+
         addr_ = reinterpret_cast<unsigned char*>(
-                mmap( NULL, len, PROT_READ | PROT_WRITE,
-                      MAP_SHARED, fd, 0 ));
+                mmap(NULL, len, PROT_READ | PROT_WRITE,
+                      MAP_SHARED, fd_, 0 ));
 
-        if (addr_ == MAP_FAILED)
-            throw std::runtime_error("mmap failed");
+        if (addr_ == MAP_FAILED) {
+            perror("mmap failed");
+        }
 
-        if (fd > 0)
-            close(fd);
     }
 
     mmapManager::~mmapManager() {
         munmap(addr_, len_);
+        if (fd_ >= 0)
+            close(fd_);
     }
 
     unsigned char* mmapManager::get() {
@@ -43,7 +48,8 @@ namespace tundra {
     }
 
     void mmapManager::sync() {
-        msync(addr_,len_,MS_ASYNC);
+        if (msync(addr_,len_,MS_ASYNC) == -1)
+            perror("mmap sync failed.");
     }
 
 } // tundra

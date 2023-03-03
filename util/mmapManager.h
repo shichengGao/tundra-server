@@ -25,6 +25,7 @@ public:
 
 private:
     const std::string fName_;
+    int fd_;
     unsigned char* addr_;
     const int len_;
 };

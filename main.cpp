@@ -6,12 +6,16 @@
 #include <memory>
 #include "util/BlockingQueue.h"
 #include <unistd.h>
+#include <cstring>
 #include <stdlib.h>
 #include <chrono>
 #include <atomic>
 #include <thread>
 #include <vector>
 #include <queue>
+#include <unistd.h>
+#include <fcntl.h>
+#include "util/mmapManager.h"
 
 using namespace std;
 
@@ -28,6 +32,12 @@ public:
 
 
 int main(int argc,char* argv[]) {
-    queue<double> q;
-    cout<< sizeof(struct timeval)<<endl;
+
+    tundra::mmapManager mmap("test_log_file_12", 1024*1024);
+
+    char buffer[] = "MAIN TEST. MAIN TEST. MAIN TEST\n";
+    memcpy(mmap.get(), buffer, sizeof(buffer));
+
+    mmap.sync();
+
 }

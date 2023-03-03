@@ -50,23 +50,6 @@ private:
 };
 
 
-class _Logger final{
-public:
-
-private:
-    const int flushInterval_;
-    std::atomic<bool> running_;
-    const String basename_;
-    const off_t rollSize_;
-
-    std::mutex mtx_;
-    std::condition_variable cond_;
-
-
-
-};
-
-#define LOG
 }
 
 

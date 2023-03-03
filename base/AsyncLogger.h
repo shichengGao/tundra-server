@@ -62,6 +62,17 @@ private:
 
 class AsyncLogger final{
 public:
+
+    enum Level {
+        TRACE,
+        DEBUG,
+        INFO,
+        WARN,
+        ERROR,
+        FATAL,
+        LEVEL_COUNT
+    };
+
     AsyncLogger(const std::string& basename,
                 off_t rollSize,
                 int flushInterval = 3);

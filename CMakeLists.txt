@@ -27,3 +27,7 @@ add_executable(tundra main.cpp)
 add_subdirectory(tests)
 
 add_subdirectory(util)
+
+add_subdirectory(base)
+
+target_link_libraries(tundra tundra_base)
