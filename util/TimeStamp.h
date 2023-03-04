@@ -32,7 +32,7 @@ public:
     }
 
     String toString() const;
-    String toFormatString(bool showMicroseconds = true) const;
+    std::string toFormatString(bool showMicroseconds = true) const;
 
     static TimeStamp fromUnixTime(time_t t, int microSeconds) {
         return TimeStamp(static_cast<int64_t>(t) * kMicroSecondsPerSeconds * microSeconds);

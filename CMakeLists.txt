@@ -3,6 +3,9 @@ project(tundra)
 
 set(CMAKE_CXX_STANDARD 14)
 
+#set(CMAKE_BUILD_TYPE  "Debug")
+set(CMAKE_BUILD_TYPE "Release")
+
 # protobuf library
 #find_package(Protobuf REQUIRED)
 #

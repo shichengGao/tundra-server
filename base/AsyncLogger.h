@@ -14,6 +14,7 @@
 #include <condition_variable>
 
 #include "util/CountDownLatch.h"
+#include "base/LogFile.h"
 
 namespace tundra{
 
@@ -22,7 +23,7 @@ class FixedBuffer {
 public:
     FixedBuffer(size_t capacity) : capacity_(capacity),
             data_(new char[capacity]), cur_(data_) {
-
+        bzero();
     }
 
     ~FixedBuffer() {
@@ -36,7 +37,17 @@ public:
     void append(const char* buf, size_t len) {
         if (avail() > len) {
             memcpy(cur_, buf, len);
+            cur_ += len;
         }
+    }
+
+    void bzero() {
+        memset(data_, 0, capacity_);
+    }
+
+    void clear() {
+        bzero();
+        cur_ = data_;
     }
 
     size_t size() const {
@@ -51,7 +62,6 @@ public:
         return capacity() - size();
     }
 
-    //FIXME: maybe not needed
     friend class AsyncLogger;
 private:
     char* data_;
@@ -62,7 +72,7 @@ private:
 
 class AsyncLogger final{
 public:
-
+    //TODO: add log level
     enum Level {
         TRACE,
         DEBUG,
@@ -73,8 +83,12 @@ public:
         LEVEL_COUNT
     };
 
+    static const size_t blockSize_; //4M per buffer
+    static const int initialBufferCounts = 15;
+    static const int maxBufferCounts = 16; //soft limit
+
     AsyncLogger(const std::string& basename,
-                off_t rollSize,
+                off_t rollSize = LogFile::defaultRollSize,
                 int flushInterval = 3);
 
     ~AsyncLogger() {
@@ -100,11 +114,6 @@ public:
         cond_.notify_all();
         thread_.join();
     }
-
-    static const size_t blockSize = 4 * 1024 * 1024; //4M per buffer
-
-    static const int initialBufferCounts = 4;
-    static const int maxBufferCounts = 16;
 
 private:
     using Buffer = FixedBuffer;

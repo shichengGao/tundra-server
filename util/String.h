@@ -11,7 +11,7 @@
 #include <assert.h>
 
 namespace tundra {
-
+//only readable interface
 class String {
 public:
     String() : data_(""), len_(0) { }
@@ -33,6 +33,7 @@ public:
     String(String&& rhs) {
         data_ = rhs.data_;
         len_ = rhs.len_;
+        rhs.data_ = nullptr;
     }
 
     String operator=(const String& rhs) {
@@ -40,9 +41,11 @@ public:
         len_ = rhs.len_;
     }
 
-    String operator=(const String&& rhs) {
+    String& operator=(String&& rhs) {
         data_ = rhs.data_;
         len_ = rhs.len_;
+        rhs.data_ = nullptr;
+        return *this;
     }
 
     void swap(String& rhs) {

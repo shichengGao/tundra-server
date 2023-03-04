@@ -7,6 +7,7 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <stdexcept>
+#include <cstring>
 
 namespace tundra {
     mmapManager::mmapManager(int len)
@@ -15,16 +16,21 @@ namespace tundra {
     }
 
     mmapManager::mmapManager(const std::string& filename, int len)
-        : fd_(-1), fName_(filename), len_(len) {
+        : fd_(-1), curPos_(0), fName_(filename), len_(len){
 
         if (!fName_.empty()) {
-            fd_ = open(fName_.c_str(), O_CREAT|O_APPEND|O_RDWR);
+            fd_ = open(fName_.c_str(), O_CREAT|O_TRUNC|O_RDWR, 0644);
             assert(fd_ >= 0);
         }
 
         //FIXME: wsl bug, move tundra to native linux afterwards
-        lseek(fd_,len, SEEK_SET);
-        write(fd_, " ", 1);;
+        if(lseek(fd_,len-1, SEEK_SET) == -1) {
+            perror("lseek failed.\n");
+        }
+
+        if (write(fd_, "", 1) == -1) {
+            perror("Error writing last byte of file\n");
+        }
 
 
         addr_ = reinterpret_cast<unsigned char*>(
@@ -35,16 +41,22 @@ namespace tundra {
             perror("mmap failed");
         }
 
+        close(fd_);
+
     }
 
     mmapManager::~mmapManager() {
-        munmap(addr_, len_);
-        if (fd_ >= 0)
-            close(fd_);
+        if (munmap(addr_, len_) == -1) {
+            perror("munmap failed.\n");
+        }
+        truncate(fName_.c_str(), curPos_);
+        close(fd_);
     }
 
-    unsigned char* mmapManager::get() {
-        return addr_;
+    void mmapManager::append(const char *buf, int len) {
+        assert(curPos_ + len <= this->len_);
+        std::memcpy((addr_ + curPos_), buf, len);
+        curPos_ += len;
     }
 
     void mmapManager::sync() {

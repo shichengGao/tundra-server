@@ -8,13 +8,15 @@
 
 namespace tundra {
 
+const size_t AsyncLogger::blockSize_ = 4 * 1024 * 1024;
+
 AsyncLogger::AsyncLogger(const std::string &basename, off_t rollSize, int flushInterval)
     :basename_(basename), rollSize_(rollSize), flushInterval_(flushInterval),
      stop_(true), latch_(1), curBufferCounts_(initialBufferCounts),
-     currentBuffer_(std::make_unique<Buffer>(blockSize))
+     currentBuffer_(std::make_unique<Buffer>(AsyncLogger::blockSize_))
 {
     for (int i=0; i<initialBufferCounts-1; ++i)
-        emptyBuffers_.emplace_back(std::make_unique<Buffer>(blockSize));
+        emptyBuffers_.emplace_back(std::make_unique<Buffer>(AsyncLogger::blockSize_));
 }
 
 void AsyncLogger::updateCurBuffer() {
@@ -25,19 +27,24 @@ void AsyncLogger::updateCurBuffer() {
         currentBuffer_ = std::move(emptyBuffers_.front());
         emptyBuffers_.pop_front();
     } else {                            //apply new buffer, buffer-nums may exceed the upper limits
-        currentBuffer_ = std::make_unique<Buffer>(blockSize);
+        currentBuffer_ = std::make_unique<Buffer>(AsyncLogger::blockSize_);
         ++curBufferCounts_;
     }
 }
 
 void AsyncLogger::append(const char *logline, int len) {
+
+    auto trueLogLine = TimeStamp::now().toFormatString() + " " + logline + "\n";
     std::lock_guard<std::mutex> lg(mtx_);
-
-    if (currentBuffer_->avail() < len)
+    if (currentBuffer_->avail() < len) {
+//        printf("not enough space. update buffer.\n");
         updateCurBuffer();
-
-    currentBuffer_->append(logline, len);
-    cond_.notify_all();
+        currentBuffer_->append(trueLogLine.c_str(), trueLogLine.size());
+        if (fullBuffers_.size() > curBufferCounts_ / 2)
+            cond_.notify_one();
+    } else {
+        currentBuffer_->append(trueLogLine.c_str(), trueLogLine.size());
+    }
 }
 
 // 局部性原理
@@ -50,20 +57,30 @@ void AsyncLogger::run() {
     assert(!stop_);
     latch_.countDown();
 
+    LogFile logFile(basename_, rollSize_);
+
     BufferVector buffersToWrite;
 
     while(!stop_) {
         assert(buffersToWrite.empty());
 
         {
-            std::unique_lock<std::mutex> ulk;
+            std::unique_lock<std::mutex> ulk(mtx_);
             if (fullBuffers_.empty()) {
                 cond_.wait_for(ulk, std::chrono::seconds(flushInterval_));
+//                printf("wake up or 3 seconds passed.\n");
             }
 
-            updateCurBuffer();  //log in time
+//            printf("empty nums: %d\n", emptyBuffers_.size());
+//            printf("full nums: %d\n", fullBuffers_.size());
+//            printf("curent usage: %d\n", currentBuffer_->size());
+
+            if (fullBuffers_.empty())
+                updateCurBuffer();  //log in time
 
             buffersToWrite.swap(fullBuffers_);
+
+
 
         }
 
@@ -72,22 +89,27 @@ void AsyncLogger::run() {
         if (buffersToWrite.size() > maxBufferCounts - 1) {
             char buf[256];
             snprintf(buf, sizeof(buf), "Dropped log message at %s, %zd buffers\n",
-                     TimeStamp::now().toFormatString().data(), buffersToWrite.size()+1);
+                     TimeStamp::now().toFormatString().c_str(), buffersToWrite.size()+1);
+//            printf("%s\n", buf);
             fputs(buf,stderr);
             //TODO: output error logs
+            buffersToWrite.erase(buffersToWrite.begin() + maxBufferCounts-1);
+            logFile.append(buf, sizeof(buf));
         }
 
         for (const auto& buffer : buffersToWrite) {
-            //TODO: output logs
+            logFile.append(buffer->data_, buffer->size());
+            buffer->clear();
         }
 
         //move buffers to empty logs
         {
             std::lock_guard<std::mutex> lg(mtx_);
             while (!buffersToWrite.empty()) {
-                emptyBuffers_.emplace_back(std::move(buffersToWrite.front()));
+                emptyBuffers_.emplace_front(std::move(buffersToWrite.front()));
                 buffersToWrite.pop_front();
             }
+//            printf("fill emptyBuffers\n");
         }
 
         assert(buffersToWrite.empty());

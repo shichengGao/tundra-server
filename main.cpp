@@ -16,28 +16,16 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "util/mmapManager.h"
+#include "util/TimeStamp.h"
 
 using namespace std;
-
-struct Entry{
-public:
-    Entry(int id = 0, double width = 18.0, bool isEmergency = false)
-            : id(id), width(width), isEmgercy(isEmergency) {  };
-
-    int id;
-    double width;
-    bool isEmgercy;
-};
 
 
 
 int main(int argc,char* argv[]) {
 
-    tundra::mmapManager mmap("test_log_file_12", 1024*1024);
+    cout<< sizeof("20230304 05:10:37.187051 THE MESSAGE TWO. TWO. TWO\n");
 
-    char buffer[] = "MAIN TEST. MAIN TEST. MAIN TEST\n";
-    memcpy(mmap.get(), buffer, sizeof(buffer));
 
-    mmap.sync();
 
 }

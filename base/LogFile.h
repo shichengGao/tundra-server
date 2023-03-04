@@ -6,8 +6,10 @@
 #define TUNDRA_LOGFILE_H
 
 #include <memory>
+#include <mutex>
 #include <assert.h>
 #include "util/mmapManager.h"
+#include "util/TimeStamp.h"
 
 namespace tundra {
 
@@ -31,7 +33,7 @@ public:
     static const off_t defaultRollSize = 128 * 1024 * 1024; //128M
 
 private:
-    static std::string getLogFileName(const std::string& basename, time_t* now);
+    static std::string getLogFileName(const std::string& basename);
     std::string basename_;
     const off_t rollSize_;
     off_t cur_bytes_;

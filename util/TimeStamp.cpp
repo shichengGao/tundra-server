@@ -16,7 +16,7 @@ String TimeStamp::toString() const {
     return buf;
 }
 
-String TimeStamp::toFormatString(bool showMicroseconds) const {
+std::string TimeStamp::toFormatString(bool showMicroseconds) const {
     char buf[64] = {0};
     time_t seconds = static_cast<time_t>(microSecondsSinceUnixEpoch_ / kMicroSecondsPerSeconds);
     struct tm tm_time;
@@ -36,7 +36,7 @@ String TimeStamp::toFormatString(bool showMicroseconds) const {
                  tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday,
                  tm_time.tm_hour, tm_time.tm_min, tm_time.tm_sec);
     }
-    return buf;
+    return std::string(buf, strlen(buf));
 }
 
 TimeStamp TimeStamp::now() {

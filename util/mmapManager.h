@@ -19,14 +19,20 @@ public:
     explicit mmapManager(const std::string& filename, int len);
     ~mmapManager();
 
-    unsigned char* get();
+    void append(const char* buf, int len);
+
+    const char* data() const {
+        return reinterpret_cast<const char*>(addr_);
+    }
+
     int len() const;
     void sync();
 
 private:
     const std::string fName_;
-    int fd_;
     unsigned char* addr_;
+    int fd_;
+    int curPos_;
     const int len_;
 };
 

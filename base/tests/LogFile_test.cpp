@@ -7,14 +7,27 @@
 using namespace tundra;
 
 TEST(logfile_functions, log) {
-    LogFile logfile("test_log_func", LogFile::defaultRollSize);
+    LogFile logfile("LogFile_test_log", LogFile::defaultRollSize);
 
-    char buffer[] = "This is only for TEST, TEST LOG.\r\n";
-
+    char buffer[] = "This is only for TEST, TEST LOG.\n";
     for (int i=0; i<120; ++i) {
-        logfile.append(buffer, sizeof(buffer));
+        logfile.append(buffer, sizeof(buffer)-1);
     }
-    logfile.flush();
+
+    EXPECT_TRUE(true);
+}
+
+TEST(logfile_functions, roll) {
+    LogFile logFile("LogFile_test_roll", 16 * 1024 * 1024);
+    char buffer[] = "012345678\n";
+
+    for (int j=0; j< 1024; ++j) {
+        for (int i=0; i<4 * 4096; ++i) {
+            logFile.append(buffer, sizeof(buffer)-1);
+        }
+    }
+
+    logFile.flush();
 
     EXPECT_TRUE(true);
 }
