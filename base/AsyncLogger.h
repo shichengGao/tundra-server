@@ -72,7 +72,7 @@ private:
 
 class AsyncLogger final{
 public:
-    //TODO: add log level
+    //TODO: add level to log contents
     enum Level {
         TRACE,
         DEBUG,
@@ -97,10 +97,55 @@ public:
         }
     }
 
+
     void append(const char* logline, int len);
 
     void append(const std::string& msg) {
         append(msg.c_str(), msg.size());
+    }
+
+    void log_trace(const std::string& msg) {
+        if (logLevel_ <= Level::TRACE) {
+            append(msg);
+        }
+    }
+
+    void log_debug(const std::string& msg) {
+        if (logLevel_ <= Level::DEBUG) {
+            append(msg);
+        }
+    }
+
+    void log_info(const std::string& msg) {
+        if (logLevel_ <= Level::INFO) {
+            append(msg);
+        }
+    }
+
+    void log_warn(const std::string& msg) {
+        if (logLevel_ <= Level::WARN) {
+            append(msg);
+        }
+    }
+
+    void log_error(const std::string& msg) {
+        if (logLevel_ <= Level::ERROR) {
+            append(msg);
+        }
+    }
+
+    void log_fatal(const std::string& msg) {
+        if (logLevel_ <= Level::FATAL) {
+            append(msg);
+        }
+    }
+
+    void setLevel(Level level) {
+        logLevel_ = level;
+    }
+
+    Level getLevel() const {
+        return logLevel_;
     }
 
     void start() {
@@ -115,10 +160,12 @@ public:
         thread_.join();
     }
 
+
 private:
     using Buffer = FixedBuffer;
     using BufferPtr = std::unique_ptr<FixedBuffer>;
     using BufferVector = std::deque<BufferPtr>;
+
 
     void run();  //background thread functions
 
@@ -140,6 +187,8 @@ private:
     BufferVector fullBuffers_;
 
     int curBufferCounts_;
+
+    std::atomic<Level> logLevel_;
 };
 
 }

@@ -33,4 +33,6 @@ add_subdirectory(util)
 
 add_subdirectory(base)
 
+add_subdirectory(net)
+
 target_link_libraries(tundra tundra_base)

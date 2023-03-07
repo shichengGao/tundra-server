@@ -7,6 +7,7 @@
 
 using namespace tundra;
 
+
 TEST(AsyncLogger_function_test, single_thread_log) {
     AsyncLogger logger("async_func_test_single_thread_log", LogFile::defaultRollSize);
     logger.start();
@@ -166,7 +167,7 @@ TEST(AsyncLogger_benchmark, bench_multi_thread) {
 
     std::vector<std::thread> threads_;
     TimeStamp start = TimeStamp::now();
-    int threadNum = 4;
+    int threadNum = 8;
     for (int i=0; i<threadNum; ++i) {
         threads_.emplace_back(std::thread(threadFunc, i));
     }

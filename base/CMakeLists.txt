@@ -1,6 +1,7 @@
 set(base_SRCS
         LogFile.cpp
         AsyncLogger.cpp
+        Logging.cpp
         )
 
 add_library(tundra_base STATIC ${base_SRCS})

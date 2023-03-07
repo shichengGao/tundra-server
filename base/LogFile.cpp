@@ -15,8 +15,6 @@ void LogFile::append(const char *logMsgs, int len) {
     cur_bytes_ += len;
 }
 
-
-
 void LogFile::rollFile() {
     std::string filename = getLogFileName(basename_);
 

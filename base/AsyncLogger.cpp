@@ -12,7 +12,7 @@ const size_t AsyncLogger::blockSize_ = 4 * 1024 * 1024;
 
 AsyncLogger::AsyncLogger(const std::string &basename, off_t rollSize, int flushInterval)
     :basename_(basename), rollSize_(rollSize), flushInterval_(flushInterval),
-     stop_(true), latch_(1), curBufferCounts_(initialBufferCounts),
+     stop_(true), latch_(1), curBufferCounts_(initialBufferCounts), logLevel_(DEBUG),
      currentBuffer_(std::make_unique<Buffer>(AsyncLogger::blockSize_))
 {
     for (int i=0; i<initialBufferCounts-1; ++i)
