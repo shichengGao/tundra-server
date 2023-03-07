@@ -3,46 +3,40 @@
 //
 
 #include "net/EventLoop.h"
+#include "net/Channel.h"
+#include "net/Poller.h"
+
 #include "gtest/gtest.h"
 #include "base/Logging.h"
+#include <sys/timerfd.h>
 
 using namespace tundra;
 
-TEST(EvenLoop_run, simple_two_loop) {
-    auto threadFunc = [](){
-        printf("thraedFunc(): pid = %d, tid = %lld\n",
-               getpid(), std::this_thread::get_id());
-        tundra::EventLoop loop;
-        loop.loop();
-    };
-
-    printf("main() : pid = %d, tid = %lld\n",
-           getpid(), std::this_thread::get_id());
-
-    EventLoop loop;
-
-    std::thread subThread(threadFunc);
-
-    loop.loop();
-
-    subThread.join();
-
-    Logging::instance().log_debug("END.");
-}
-
-TEST(EvenLoop_run, negative_run) {
+TEST(composition_test, smoke_test) {
     EventLoop* g_loop;
-    auto threadFunc = [&](){
-        printf("func thread ID : %lld\n", std::this_thread::get_id());
-        g_loop->loop();
+
+    auto timeout = [&]{
+        printf("Timeout!\n");
+        g_loop->quit();
     };
 
     EventLoop loop;
     g_loop = &loop;
-    printf("now thread ID : %lld\n", std::this_thread::get_id());
-    std::thread t(threadFunc);
 
-    t.join();
+    int timerfd = ::timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
+    Channel channel(&loop, timerfd);
+    channel.setReadCallback(timeout);
+    channel.enableReading();
+
+    struct itimerspec howlong;
+    bzero(&howlong, sizeof(howlong));
+    howlong.it_value.tv_sec = 5;
+    ::timerfd_settime(timerfd, 0, &howlong, NULL);
+
+    loop.loop();
+
+    ::close(timerfd);
+
 }
 
 int main(int argc, char* argv[]) {

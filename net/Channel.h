@@ -16,6 +16,9 @@ public:
     using EventCallback = std::function<void()>;
     Channel(EventLoop* loop, int fd);
 
+    Channel(const Channel&) = delete;
+    Channel operator=(const Channel&) = delete;
+
     void handleEvent();
     void setReadCallback(const EventCallback& cb) {
         readCallback_ = cb;
@@ -67,7 +70,8 @@ private:
     const int fd_;
     int events_;  //IO events that we cared
     int revents_; //active events
-    int index_;
+
+    int index_; //index of pollfd in listend list
 
     EventCallback readCallback_;
     EventCallback writeCallback_;
