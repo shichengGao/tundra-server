@@ -83,6 +83,8 @@ public:
         LEVEL_COUNT
     };
 
+    static const std::vector<std::string> levelName;
+
     static const size_t blockSize_; //4M per buffer
     static const int initialBufferCounts = 15;
     static const int maxBufferCounts = 16; //soft limit
@@ -98,45 +100,46 @@ public:
     }
 
 
-    void append(const char* logline, int len);
+    void append(const char* logline, int len, Level level);
 
-    void append(const std::string& msg) {
-        append(msg.c_str(), msg.size());
+    void append(const std::string& msg, Level level) {
+        append(msg.c_str(), msg.size(), level);
     }
+
 
     void log_trace(const std::string& msg) {
         if (logLevel_ <= Level::TRACE) {
-            append(msg);
+            append(msg, TRACE);
         }
     }
 
     void log_debug(const std::string& msg) {
         if (logLevel_ <= Level::DEBUG) {
-            append(msg);
+            append(msg, DEBUG);
         }
     }
 
     void log_info(const std::string& msg) {
         if (logLevel_ <= Level::INFO) {
-            append(msg);
+            append(msg, INFO);
         }
     }
 
     void log_warn(const std::string& msg) {
         if (logLevel_ <= Level::WARN) {
-            append(msg);
+            append(msg, WARN);
         }
     }
 
     void log_error(const std::string& msg) {
         if (logLevel_ <= Level::ERROR) {
-            append(msg);
+            append(msg, ERROR);
         }
     }
 
     void log_fatal(const std::string& msg) {
         if (logLevel_ <= Level::FATAL) {
-            append(msg);
+            append(msg, FATAL);
         }
     }
 

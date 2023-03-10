@@ -7,7 +7,6 @@
 
 using namespace tundra;
 
-
 TEST(AsyncLogger_function_test, single_thread_log) {
     AsyncLogger logger("async_func_test_single_thread_log", LogFile::defaultRollSize);
     logger.start();
@@ -21,7 +20,7 @@ TEST(AsyncLogger_function_test, single_thread_log) {
     for (int i=0; i< 1024 ; ++i) {
         for (int j=0; j < 1024; ++j) {
             int k = rand() % 3;
-            logger.append(bufs[k], size);
+            logger.append(bufs[k], size, tundra::AsyncLogger::DEBUG);
         }
         usleep(300);
     }
@@ -44,7 +43,7 @@ TEST(AsyncLogger_function_test, single_thread_roll) {
     for (int i=0; i<1024 ; ++i) {
         for (int j=0; j < 2048; ++j) {
             int k = rand() % 3;
-            logger.append(bufs[k], size);
+            logger.append(bufs[k], size, tundra::AsyncLogger::DEBUG);
         }
         usleep(300);
     }
@@ -67,7 +66,7 @@ TEST(AsyncLogger_function_test, multi_thread_log) {
 
         for (int i=0; i<1024 ; ++i) {
             for (int j=0; j < 1024; ++j) {
-                logger.append(buf, size);
+                logger.append(buf, size, tundra::AsyncLogger::DEBUG);
             }
             usleep(300);
         }
@@ -114,7 +113,7 @@ TEST(AsyncLogger_benchmark, bench) {
                                "Hello 0123456789 abcdefghijklmnopqrstuvwxyz %s %d",
                                i % 10 == 1 ? longStr.c_str() : empty.c_str(), cnt++);
 
-            logger.append(buf, len);
+            logger.append(buf, len, tundra::AsyncLogger::DEBUG);
 
         }
         TimeStamp end = TimeStamp::now();
@@ -154,7 +153,7 @@ TEST(AsyncLogger_benchmark, bench_multi_thread) {
                                    "Hello 0123456789 abcdefghijklmnopqrstuvwxyz %s %d , id : %d",
                                    i % 10 == 0 ? longStr.c_str() : empty.c_str(), cnt++, id);
 
-                logger.append(buf, len);
+                logger.append(buf, len, tundra::AsyncLogger::DEBUG);
 
             }
             TimeStamp end = TimeStamp::now();

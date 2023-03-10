@@ -10,6 +10,15 @@ namespace tundra {
 
 const size_t AsyncLogger::blockSize_ = 4 * 1024 * 1024;
 
+const std::vector<std::string> AsyncLogger::levelName = {
+        "TRACE",
+        "DEBUG",
+        "INFO",
+        "WARN",
+        "ERROR",
+        "FATAL"
+};
+
 AsyncLogger::AsyncLogger(const std::string &basename, off_t rollSize, int flushInterval)
     :basename_(basename), rollSize_(rollSize), flushInterval_(flushInterval),
      stop_(true), latch_(1), curBufferCounts_(initialBufferCounts), logLevel_(DEBUG),
@@ -32,9 +41,9 @@ void AsyncLogger::updateCurBuffer() {
     }
 }
 
-void AsyncLogger::append(const char *logline, int len) {
+void AsyncLogger::append(const char *logline, int len, Level level) {
 
-    auto trueLogLine = TimeStamp::now().toFormatString() + " " + logline + "\n";
+    auto trueLogLine = TimeStamp::now().toFormatString() + " " + levelName[level] + " " + logline + "\n";
     std::lock_guard<std::mutex> lg(mtx_);
     if (currentBuffer_->avail() < len) {
 //        printf("not enough space. update buffer.\n");

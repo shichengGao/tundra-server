@@ -50,5 +50,5 @@ int main(int argc, char* argv[]) {
 
 
     Logging::instance().stop();
-//    system("rm EventLoop_test*.log");
+    system("rm EventLoop_test*.log");
 }

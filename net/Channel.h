@@ -49,9 +49,9 @@ public:
     }
 
     void enableReading() { events_ |= kReadEvent; update();}
-//    void enableWritting() { events_ |= kWriteEvent; update();}
-//    void disableWritting() { events_ &= ~kWriteEvent; update();}
-//    void diableAll() { events_ = kNoneEvent; update();}
+    void enableWritting() { events_ |= kWriteEvent; update();}
+    void disableWritting() { events_ &= ~kWriteEvent; update();}
+    void disableAll() { events_ = kNoneEvent; update();}
 
     //for poller
     int index(){ return index_; }
