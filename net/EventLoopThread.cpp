@@ -39,7 +39,7 @@ void EventLoopThread::threadFunc() {
     {
         std::unique_lock<std::mutex> ulk(mtx_);
         loop_ = &loop;
-        cond_.notify_all();
+        cond_.notify_one();
     }
 
     loop.loop();

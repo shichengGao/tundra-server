@@ -4,6 +4,8 @@ set(net_SRCS
         Poller.cpp
         Timer.cpp
         TimerQueue.cpp
+        Socket.cpp
+        Acceptor.cpp
         )
 
 add_library(tundra_net STATIC ${net_SRCS})
