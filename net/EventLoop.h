@@ -6,6 +6,7 @@
 #define TUNDRA_EVENTLOOP_H
 #include <atomic>
 #include <thread>
+#include <mutex>
 #include <vector>
 
 #include "util/TimeStamp.h"

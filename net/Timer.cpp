@@ -5,7 +5,8 @@
 #include "Timer.h"
 
 namespace tundra{
-    std::atomic<int64_t> s_numCreated_;
+
+    std::atomic<int64_t> Timer::s_numCreated_;
 
 void Timer::restart(tundra::TimeStamp now) {
     if (repeat_) {

@@ -15,6 +15,7 @@ class Channel {
 public:
     using EventCallback = std::function<void()>;
     Channel(EventLoop* loop, int fd);
+    ~Channel();
 
     Channel(const Channel&) = delete;
     Channel operator=(const Channel&) = delete;
@@ -59,6 +60,10 @@ public:
 
     EventLoop* ownerLoop() { return loop_; }
 
+    ///prevent the owner object being destroyed in handleEvent.
+//    void tie(const std::shared_ptr<void>&);
+//    void remove();
+
 private:
     void update();
 
@@ -73,8 +78,14 @@ private:
 
     int index_; //index of pollfd in listend list
 
+    bool eventHandling_;
+    bool addedToLoop_;
+
+
+
     EventCallback readCallback_;
     EventCallback writeCallback_;
+    EventCallback closeCallback_;
     EventCallback errorCallback_;
 };
 

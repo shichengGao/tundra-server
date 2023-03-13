@@ -40,7 +40,7 @@ struct timespec howMuchTimeFromNow(TimeStamp when) {
     ts.tv_sec = static_cast<time_t >(
             microseconds / TimeStamp::kMicroSecondsPerSeconds);
     ts.tv_nsec = static_cast<long>(
-            (microseconds % TimeStamp::kMicroSecondsPerSeconds) * 1000));
+            (microseconds % TimeStamp::kMicroSecondsPerSeconds) * 1000);
     return ts;
 }
 
@@ -74,7 +74,7 @@ void resetTimerfd(int timerfd, TimeStamp expiration) {
 }
 }
 
-TimerQueue::TimerQueue(EeventLoop* loop)
+TimerQueue::TimerQueue(EventLoop* loop)
     : loop_(loop), timerfd_(detail::createTimerfd()),
       timerfdChannel_(loop, timerfd_), timers_(),
       callingExpiredTimers_(false)
@@ -85,7 +85,7 @@ TimerQueue::TimerQueue(EeventLoop* loop)
 
 TimerQueue::~TimerQueue() {
     timerfdChannel_.disableAll();
-    timerfdChannel_.remove();
+//    timerfdChannel_.remove();
     close(timerfd_);
 
     for (const Entry& timer : timers_) {

@@ -13,6 +13,9 @@ class InetAddress;
 //the RAII handle of socket file descriptor
 class Socket {
 public:
+
+    static int createNonBlockingSocket();
+
     explicit Socket(int sockfd)
         : sockfd_(sockfd) { }
 
@@ -33,6 +36,7 @@ public:
 
     void setTcpNoDelay(bool on);
     void setReuseAddr(bool on);
+    void setReusePort(bool on);
     void setKeepAlive(bool on);
 
 private:

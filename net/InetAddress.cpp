@@ -17,7 +17,7 @@ InetAddress::InetAddress(uint16_t port, bool loopbackOnly) {
     addr_.sin_family = AF_INET;
     in_addr_t ip = loopbackOnly ? kInaddrLoopback : kInaddrAny;
     addr_.sin_addr.s_addr = htonl(ip);
-    addr_.sin_port = htonl(port);
+    addr_.sin_port = htons(port);
 }
 
 InetAddress::InetAddress(const char *ip, uint16_t port) {
@@ -63,9 +63,20 @@ bool InetAddress::resolve(const char *hostname, tundra::InetAddress *result) {
         return true;
     } else {
         if (ret)
-            Logging::instance().log_error("InetAdress::resolv error.");
+            Logging::instance().log_error("InetAddress::resolve error.");
         return false;
     }
+}
+
+struct sockaddr_in InetAddress::getLocalAddr(int sockfd) {
+    struct sockaddr_in localaddr;
+    memset(&localaddr, 0, sizeof(localaddr));
+    socklen_t addrLen = sizeof(localaddr);
+
+    if (getsockname(sockfd, reinterpret_cast<struct sockaddr*>(&localaddr), &addrLen) < 0) {
+        Logging::instance().log_error("InetAddress::getLocalAddr error.");
+    }
+    return localaddr;
 }
 
 }

@@ -34,6 +34,8 @@ public:
 
     static bool resolve(const char* hostname, InetAddress* result);
 
+    static struct sockaddr_in getLocalAddr(int sockfd);
+
 private:
     struct sockaddr_in addr_;
 

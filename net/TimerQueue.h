@@ -18,7 +18,7 @@
 
 namespace tundra{
 
-class EeventLoop;
+class EventLoop;
 class Timer;
 class TimerId;
 
@@ -27,7 +27,7 @@ class TimerId;
 
 class TimerQueue {
 public:
-    explicit TimerQueue(EeventLoop* loop);
+    explicit TimerQueue(EventLoop* loop);
     ~TimerQueue();
 
     TimerId addTimer(const TimerCallback& cb,

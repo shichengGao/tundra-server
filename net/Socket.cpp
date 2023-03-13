@@ -14,6 +14,14 @@
 
 namespace tundra {
 
+int Socket::createNonBlockingSocket() {
+    int sockfd = socket(PF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP);
+    if (sockfd < 0) {
+        Logging::instance().log_fatal("create non-blocking socket failed.");
+    }
+    return sockfd;
+}
+
 Socket::~Socket() {
     close(sockfd_);
 }
@@ -50,7 +58,6 @@ bool Socket::getTcpInfoString(char *buf, int len) const {
 }
 
 void Socket::bind(const tundra::InetAddress& localAddr) {
-
     if (::bind(sockfd_, localAddr.getSockAddr(), sizeof(struct sockaddr)) < 0) {
         Logging::instance().log_fatal("Socket bind() fatal.");
     }
@@ -98,6 +105,14 @@ void Socket::setReuseAddr(bool on) {
     int ret = setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
     if (ret < 0 && on) {
         Logging::instance().log_error("SO_REUSEADDR failed.");
+    }
+}
+
+void Socket::setReusePort(bool on) {
+    int optval = on ? 1 : 0;
+    int ret = setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(optval));
+    if (ret < 0 && on) {
+        Logging::instance().log_error("SO_REUSEPORT failed.");
     }
 }
 

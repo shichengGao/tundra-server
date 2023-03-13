@@ -1,51 +1,66 @@
-#include <iostream>
-#include <set>
-#include <memory>
+//
+// Created by scgao on 2023/3/11.
+//
 
-#include <unistd.h>
-
-#include "util/TimeStamp.h"
 #include "base/Logging.h"
+#include "net/Acceptor.h"
 #include "net/InetAddress.h"
 #include "net/EventLoop.h"
-#include "net/Acceptor.h"
+#include "gtest/gtest.h"
 
-
-using namespace tundra;
 using namespace std;
+using namespace tundra;
+
 
 void newConnection(int sockfd, const InetAddress& peerAddr) {
     printf("newConnection(): accepted a new connection from %s\n",
            peerAddr.toIpPort().c_str());
-    Logging::instance().log_info("new conn!");
-
-    auto time = TimeStamp::now().toFormatString();
-
-    write(sockfd, time.c_str(), time.size());
+    write(sockfd, "How are you?\n", 13);
     close(sockfd);
 }
 
-void mainCase(){
+/// cannot stop normally, caused logging error.
+TEST(acceptor_function_test, simple_case) {
     printf("main(): pid = %d\n", getpid());
 
     InetAddress listenAddr(9981);
     EventLoop loop;
 
-
     Acceptor acceptor(&loop, listenAddr);
     acceptor.setNewConnectionCallback(newConnection);
     acceptor.listen();
     loop.loop();
+
+    loop.quit();
 }
 
-int main() {
+int main(int argc, char* argv[]) {
     Logging::InitLoggingConfig("Acceptor_test", Logging::rollSize_, Logging::flushInterval_);
     Logging::instance().start();
     Logging::instance().log_info("START.");
 
+    testing::InitGoogleTest();
 
-    mainCase();
+    int ret = RUN_ALL_TESTS();
 
     Logging::instance().stop();
-    return 0;
+    return ret;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
