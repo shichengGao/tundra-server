@@ -16,6 +16,9 @@ class Buffer {
 public:
     static const size_t kCheapPrepend = 8;
     static const size_t kInitialSize = 4088;
+
+    static const char kCRLF[];
+
     explicit Buffer(size_t initialSize = kInitialSize)
         : buffer_(kCheapPrepend + kInitialSize),
           readerIndex_(kCheapPrepend),
@@ -161,6 +164,8 @@ public:
     size_t capacity() const {
         return buffer_.capacity();
     }
+
+    ssize_t readFd(int fd, int* savedErrno);
 
 
 private:

@@ -5,8 +5,10 @@
 #include "Poller.h"
 #include "net/Channel.h"
 #include "base/Logging.h"
+#include "util/TimeStamp.h"
 
 #include <poll.h>
+#include <assert.h>
 #include <sstream>
 
 
@@ -16,27 +18,38 @@ namespace tundra {
 Poller::Poller(tundra::EventLoop *loop) :
     ownerLoop_(loop) { }
 
-Poller::~Poller() { }
+Poller::~Poller() = default;
 
-TimeStamp Poller::poll(int timeoutMs, tundra::Poller::ChannelList *activeChannels) {
+bool Poller::hasChannel(Channel* channel) const {
+    assertInLoopThread();
+    ChannelMap::const_iterator it = channels_.find(channel->fd());
+    return it != channels_.end() && it->second == channel;
+}
+
+TimeStamp Poller::poll(int timeoutMs, ChannelList *activeChannels) {
     //poll is a blocking function
     int numEvents = ::poll(&*pollfds_.begin(), pollfds_.size(), timeoutMs);
+    int savedErrno = errno;
     TimeStamp now(TimeStamp::now());
 
     if (numEvents > 0) {
-        std::ostringstream ss;
-        ss << numEvents << " events happened";
-        Logging::instance().log_trace(ss.str());
+        std::ostringstream logStream;
+        logStream << numEvents << " events happened";
+        Logging::instance().log_trace(logStream.str());
         fillActiveChannels(numEvents, activeChannels);
     } else if (numEvents == 0) {
         Logging::instance().log_trace(" nothing happended");
     } else {
-        Logging::instance().log_error("Poller::poll() error");
+        //Interrupted system call would not shut down the program.
+        if (savedErrno != EINTR) {
+            errno = savedErrno;
+            Logging::instance().log_error("Poller::poll() error");
+        }
     }
     return now;
 }
 
-void Poller::fillActiveChannels(int numEvents, tundra::Poller::ChannelList *activeChannels) const {
+void Poller::fillActiveChannels(int numEvents, ChannelList *activeChannels) const {
     for (PollFdList::const_iterator pfd = pollfds_.begin();
         pfd != pollfds_.end() && numEvents > 0; ++pfd) {
         if (pfd->revents > 0) {
@@ -54,9 +67,9 @@ void Poller::fillActiveChannels(int numEvents, tundra::Poller::ChannelList *acti
 void Poller::updateChannel(tundra::Channel *channel) {
     assertInLoopThread();
 
-    std::ostringstream ss;
-    ss << "fd = "<< channel->fd() <<" events = " << channel->events();
-    Logging::instance().log_trace(ss.str());
+    std::ostringstream logStream;
+    logStream << "fd = "<< channel->fd() <<" events = " << channel->events();
+    Logging::instance().log_trace(logStream.str());
 
     if (channel->index() < 0) {
         //add new one
@@ -77,6 +90,7 @@ void Poller::updateChannel(tundra::Channel *channel) {
         assert(0 <= idx && idx < static_cast<int>(pollfds_.size()));
         struct pollfd& pfd = pollfds_[idx];
         assert(pfd.fd == channel->fd() || pfd.fd == -channel->fd()-1);
+        pfd.fd = channel->fd();
         pfd.events = static_cast<short>(channel->events());
         pfd.revents = 0;
         if (channel->isNoneEvent()) {
@@ -88,9 +102,9 @@ void Poller::updateChannel(tundra::Channel *channel) {
 
 void Poller::removeChannel(Channel *channel) {
     assertInLoopThread();
-    std::ostringstream ss;
-    ss << "fd = " << channel->fd();
-    Logging::instance().log_trace(ss.str());
+    std::ostringstream logStream;
+    logStream << "fd = " << channel->fd();
+    Logging::instance().log_trace(logStream.str());
     assert(channels_.find(channel->fd()) != channels_.end());
     assert(channels_[channel->fd()] == channel);
     assert(channel->isNoneEvent());

@@ -20,7 +20,8 @@ public:
     using NewConnectionCallback =
             std::function<void(int sockfd,const InetAddress&)>;
 
-    Acceptor(EventLoop* loop, const InetAddress& listenAddr);
+    Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reuseport);
+    ~Acceptor();
 
     //noncopyable
     Acceptor(const Acceptor&) = delete;
@@ -41,6 +42,7 @@ private:
     Channel acceptChannel_;
     NewConnectionCallback newConnectionCallback_;
     bool listening_;
+    //when file descriptor is run out, release this for accept
     int idleFd_;
 };
 

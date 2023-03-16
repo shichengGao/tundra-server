@@ -28,8 +28,19 @@ public:
     EventLoop();
     ~EventLoop();
 
+    EventLoop(const EventLoop&) = delete;
+    EventLoop operator=(const EventLoop&) = delete;
+
     void loop();
     void quit();
+
+    TimeStamp pollReturnTime() const {
+        return pollReturnTime_;
+    }
+
+    int64_t iteration() const {
+        return iteration_;
+    }
 
     // internal usage
     void wakeup();
@@ -50,16 +61,20 @@ public:
     static EventLoop* getEventLoopOfCurrentThread();
 
     //timers
-    TimerId runAt(const TimeStamp& time, const TimerCallback& cb);
+    TimerId runAt(const TimeStamp& time, TimerCallback cb);
 
-    TimerId runAfter(double delay, const TimerCallback& cb);
+    TimerId runAfter(double delay, TimerCallback cb);
 
-    TimerId runEvery(double interval, const TimerCallback& cb);
+    TimerId runEvery(double interval, TimerCallback cb);
 
+    //cancels the timer
+    void cancel(TimerId timerId);
 
-    void runInLoop(const Functor& cb);
+    void runInLoop(Functor cb);
 
-    void queueInLoop(const Functor& cb);
+    void queueInLoop(Functor cb);
+
+    size_t queueSize() const;
 
 
 private:
@@ -67,23 +82,30 @@ private:
     void handleRead(); //wake up
     void doPendingFunctors();
 
+    void printActiveChannels() const;
+
     using ChannelList = std::vector<Channel*>;
 
     std::atomic<bool> looping_;
     std::atomic<bool> quit_;
+    std::atomic<bool> eventHandling_;
     std::atomic<bool> callingPendingFunctors_;
 
+    int64_t iteration_;
     const std::thread::id threadId_;
+    TimeStamp pollReturnTime_;
     std::unique_ptr<Poller> poller_;
     std::unique_ptr<TimerQueue> timerQueue_;
 
-    int weakupFd_;
+    int wakeupFd_;
     //handle readable events of wakeupFd_
     std::unique_ptr<Channel> wakeupChannel_;
-    ChannelList activeChannels_;
 
-    std::mutex mtx_;
-    std::vector<Functor> pendingFunctors_;
+    ChannelList activeChannels_;
+    Channel* currentActiveChannel_;
+
+    mutable std::mutex mtx_;
+    std::vector<Functor> pendingFunctors_ __attribute__((guarded_by(mtx_)));
 
 };
 

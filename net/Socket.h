@@ -19,6 +19,9 @@ public:
     explicit Socket(int sockfd)
         : sockfd_(sockfd) { }
 
+    Socket(const Socket&) = delete;
+    Socket operator=(const Socket&) = delete;
+
     ~Socket();
 
     int fd() const {

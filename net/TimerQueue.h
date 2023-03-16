@@ -54,7 +54,7 @@ private:
 
     bool insert(Timer* timer);
 
-    tundra::EventLoop* loop_;
+    EventLoop* loop_;
     const int timerfd_;
     Channel timerfdChannel_;
     //Timer list sorted by expiration

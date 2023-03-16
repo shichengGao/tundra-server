@@ -34,7 +34,9 @@ public:
 
     void removeChannel(Channel* channel);
 
-    void assertInLoopThread() {
+    bool hasChannel(Channel* channel) const;
+
+    void assertInLoopThread() const {
         ownerLoop_->assertInLoopThread();
     }
 
