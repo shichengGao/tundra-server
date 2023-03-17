@@ -35,4 +35,6 @@ add_subdirectory(base)
 
 add_subdirectory(net)
 
-target_link_libraries(tundra tundra_net)
+add_subdirectory(http)
+
+target_link_libraries(tundra tundra_net tundra_http)

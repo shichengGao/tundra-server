@@ -1,6 +1,6 @@
 set(util_SRCS
     Buffer.cpp
-        mmapManager.cpp
+    mmapManager.cpp
     CountDownLatch.cpp
     TimeStamp.cpp
     )

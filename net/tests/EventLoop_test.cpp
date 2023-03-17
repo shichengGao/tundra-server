@@ -15,7 +15,7 @@ using namespace tundra;
 TEST(composition_test, smoke_test) {
     EventLoop* g_loop;
 
-    auto timeout = [&]{
+    auto timeout = [&](TimeStamp receivetime){
         printf("Timeout!\n");
         g_loop->quit();
     };

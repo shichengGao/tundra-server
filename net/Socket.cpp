@@ -26,11 +26,7 @@ Socket::~Socket() {
     close(sockfd_);
 }
 
-bool Socket::getTcpInfo(struct tcp_info * tcpInfo) const {
-    socklen_t len = sizeof(*tcpInfo);
-    memset(tcpInfo, 0, len);
-    return getsockopt(sockfd_, SOL_TCP, TCP_INFO, tcpInfo, &len) == 0;
-}
+
 
 bool Socket::getTcpInfoString(char *buf, int len) const {
     struct tcp_info tcpInfo;
@@ -55,6 +51,12 @@ bool Socket::getTcpInfoString(char *buf, int len) const {
                  tcpInfo.tcpi_total_retrans);  // Total retransmits for entire connection
     }
     return ok;
+}
+
+bool Socket::getTcpInfo(struct tcp_info * tcpInfo) const {
+    socklen_t len = sizeof(*tcpInfo);
+    memset(tcpInfo, 0, len);
+    return getsockopt(sockfd_, SOL_TCP, TCP_INFO, tcpInfo, &len) == 0;
 }
 
 void Socket::bind(const tundra::InetAddress& localAddr) {

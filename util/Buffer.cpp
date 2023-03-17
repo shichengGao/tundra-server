@@ -12,7 +12,7 @@
 
 namespace tundra {
 
-const char kCRLF[] = "\r\n";
+const char Buffer::kCRLF[] = "\r\n";
 
 void Buffer::makeSpace(size_t len) {
     if (writableBytes() + prependableBytes() < len + kCheapPrepend) {
@@ -63,6 +63,31 @@ int64_t inline Buffer::peekInt64() const {
     int8_t element = 0;
     ::memcpy(&element, peek(), sizeof(int64_t));
     return element;
+}
+
+const char* Buffer::findCRLF() const {
+    const char* crlf = reinterpret_cast<const char*>(memmem(peek(), readableBytes(), kCRLF, 2));
+    return crlf;
+}
+
+const char* Buffer::findCRLF(const char* start) const {
+    assert(peek() <= start);
+    assert(start <= beginWrite());
+
+    const char* crlf = reinterpret_cast<const char*>(memmem(start, beginWrite()-start,kCRLF, 2));
+    return crlf;
+}
+
+const char* Buffer::findEOF() const {
+    const void* eol = memchr(peek(), '\n', readableBytes());
+    return reinterpret_cast<const char*>(eol);
+}
+
+const char* Buffer::findEOF(const char* start) const {
+    assert(peek() <= start);
+    assert(start <= beginWrite());
+    const void* eol = memchr(start, '\n', beginWrite() - start);
+    return reinterpret_cast<const char*>(eol);
 }
 
 //retrieve funcs

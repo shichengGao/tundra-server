@@ -11,6 +11,8 @@
 #include "base/Logging.h"
 #include "base/WeakCallback.h"
 
+#include <netinet/tcp.h>
+
 #include <sstream>
 
 namespace tundra {
@@ -61,15 +63,11 @@ TcpConnection::~TcpConnection() {
     assert(state_ == kDisconnected);
 }
 
-bool TcpConnection::getTcpInfo(struct tcp_info *tcpInfo) const {
-    return socket_->getTcpInfo(tcpInfo);
-}
-
 std::string TcpConnection::getTcpInfoString() const {
-    char buf[1024];
-    buf[0] = '\0';
-    socket_->getTcpInfoString(buf, sizeof(buf));
-    return buf;
+        char buf[1024];
+        buf[0] = '\0';
+        socket_->getTcpInfoString(buf, sizeof(buf));
+        return buf;
 }
 
 void TcpConnection::shutdown() {
@@ -99,7 +97,7 @@ void TcpConnection::send(tundra::Buffer *buf) {
         } else {
             loop_->runInLoop(
                     std::bind(static_cast<void(TcpConnection::*)(const std::string&)>
-                              (&TcpConnection::sendInLoop), this, buf->retrieveAllAsString().string()));
+                              (&TcpConnection::sendInLoop), this, buf->retrieveAllAsString()));
         }
     }
 }

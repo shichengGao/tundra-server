@@ -23,6 +23,9 @@ public:
 
     ~EventLoopThread();
 
+    EventLoopThread(const EventLoopThread&) = delete;
+    EventLoopThread operator=(const EventLoopThread&) = delete;
+
     EventLoop *startLoop();
 
 private:
@@ -34,7 +37,6 @@ private:
     std::mutex mtx_;
     std::condition_variable cond_ __attribute__((guarded_by(mtx_)));
     ThreadInitCallback callback_;
-
 };
 
 }

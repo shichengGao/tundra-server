@@ -36,7 +36,6 @@ public:
     bool connected() const { return state_ == kConnected;}
     bool disconnedted() const {return state_ == kDisconnected;}
 
-    bool getTcpInfo(struct tcp_info*) const;
     std::string getTcpInfoString() const;
 
     void send(const void* msg, int len);

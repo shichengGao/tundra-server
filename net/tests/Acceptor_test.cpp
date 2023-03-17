@@ -26,7 +26,7 @@ TEST(acceptor_function_test, simple_case) {
     InetAddress listenAddr(9981);
     EventLoop loop;
 
-    Acceptor acceptor(&loop, listenAddr);
+    Acceptor acceptor(&loop, listenAddr, false);
     acceptor.setNewConnectionCallback(newConnection);
     acceptor.listen();
     loop.loop();

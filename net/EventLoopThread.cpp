@@ -9,8 +9,16 @@
 namespace tundra{
 EventLoopThread::EventLoopThread(const ThreadInitCallback &cb,
                                  const std::string &name)
- : loop_(nullptr), exiting_(false), callback_(cb) {
+ : loop_(nullptr), exiting_(false), callback_(cb){
 
+}
+
+EventLoopThread::~EventLoopThread() {
+    exiting_ = true;
+    if (loop_) {
+        loop_->quit();
+        thread_.join();
+    }
 }
 
 
@@ -18,14 +26,16 @@ EventLoopThread::EventLoopThread(const ThreadInitCallback &cb,
 EventLoop* EventLoopThread::startLoop() {
     thread_ = std::thread(&EventLoopThread::threadFunc, this);
 
+    EventLoop* loop = nullptr;
     {
         std::unique_lock<std::mutex> ulk(mtx_);
         while (!loop_) {
             cond_.wait(ulk);
         }
+        loop = loop_;
     }
 
-    return loop_;
+    return loop;
 }
 
 

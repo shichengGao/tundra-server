@@ -9,6 +9,8 @@ set(net_SRCS
         Acceptor.cpp
         TcpConnection.cpp
         TcpServer.cpp
+        EventLoopThread.cpp
+        EventLoopThreadPool.cpp
         )
 
 add_library(tundra_net STATIC ${net_SRCS})

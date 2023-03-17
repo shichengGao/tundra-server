@@ -6,6 +6,7 @@
 #define TUNDRA_BUFFER_H
 
 #include <vector>
+#include <algorithm>
 #include <assert.h>
 
 #include "String.h"
@@ -16,8 +17,6 @@ class Buffer {
 public:
     static const size_t kCheapPrepend = 8;
     static const size_t kInitialSize = 4088;
-
-    static const char kCRLF[];
 
     explicit Buffer(size_t initialSize = kInitialSize)
         : buffer_(kCheapPrepend + kInitialSize),
@@ -62,6 +61,11 @@ public:
     int32_t peekInt32() const;
     int64_t peekInt64() const;
 
+    const char* findCRLF() const;
+    const char* findCRLF(const char* start) const;
+
+    const char* findEOF() const;
+    const char* findEOF(const char* start) const;
 
     char* beginWrite() {
         return begin() + writerIndex_;
@@ -90,16 +94,15 @@ public:
         retrieve(end-peek());
     }
 
-    String retrieveAsString(size_t len) {
+    std::string retrieveAsString(size_t len) {
         assert(len <= readableBytes());
-        auto s = String(begin(), len);
+        auto s = std::string(begin(), len);
         retrieve(len);
         return s;
-
     }
 
-    String retrieveAllAsString() {
-        retrieveAsString(readableBytes());
+    std::string retrieveAllAsString() {
+        return retrieveAsString(readableBytes());
     }
 
     void retrieveInt8();
@@ -122,8 +125,8 @@ public:
         append(reinterpret_cast<const char*>(data), len);
     }
 
-    void append(const String& str) {
-        append(str.data(), str.size());
+    void append(const std::string& str) {
+        append(str.c_str(), str.size());
     }
 
     void appendInt8(int8_t);
@@ -183,6 +186,7 @@ private:
     size_t readerIndex_;
     size_t writerIndex_;
 
+    static const char kCRLF[];
 
 };
 
