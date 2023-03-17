@@ -1,0 +1,3 @@
+add_executable(BlockingQueue_test BlockingQueue_test.cpp)
+target_link_libraries(BlockingQueue_test gtest)
+add_test(NAME BlockingQueue_test COMMAND BlockingQueue_test)
